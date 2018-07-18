@@ -1,6 +1,6 @@
 hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame,numbuffs)
 
-  local buffscale = 1.4;
+  local buffscale = 1.25;
   local debuffscale = 1.1;
   local maxbuffs = 3;         -- default: 3;
 
@@ -15,17 +15,26 @@ hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame,numbuffs)
   frame.maxBuffs = maxbuffs;
 end);
 
-hooksecurefunc("CompactUnitFrame_UpdateAuras", function(frame)
+hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
   local name = frame.name;
+  local playerName = GetUnitName(frame.unit, true);
 
   name:ClearAllPoints();
   name:SetPoint("TOPLEFT", 5, -5);
 
-  if UnitAffectingCombat("player") then
+  if (playerName) then
+    local nameWithoutRealm = gsub(playerName, "%-[^|]+", "");
+    name:SetText(nameWithoutRealm);
+  end
+
+  if InCombatLockdown() then
     name:SetAlpha(0.15);
+    -- name:Hide(1);
   else
     name:SetAlpha(1);
+    -- name:Show();
   end
+
 end);
 
 hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)

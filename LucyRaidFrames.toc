@@ -1,4 +1,4 @@
-## Interface: 70000
+## Interface: 80000
 ## Title: LucyRaidFrames
 ## Notes: Adjusts Blizzards CompactRaidFrames to my own preferences
 ## Version: 0.0.1
