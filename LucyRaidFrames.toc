@@ -6,7 +6,7 @@
 ## SavedVariables: globalSettings
 ## SavedVariablesPerCharacter: characterSettings
 
-## X-License: Public Domain
+## X-License: MIT
 ## X-Category: Unit Frames
 
 LucyRaidFrames.lua

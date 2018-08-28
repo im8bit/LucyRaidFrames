@@ -43,10 +43,10 @@ hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
     return;
   end
 
-  local iconSize = icon:GetWidth() / 4;
+  local offset = icon:GetWidth() / 4;
 
   icon:ClearAllPoints();
-  icon:SetPoint("TOPLEFT", -iconSize, iconSize);
+  icon:SetPoint("TOPLEFT", -offset, offset);
 
   local role = UnitGroupRolesAssigned(frame.unit);
 
