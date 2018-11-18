@@ -5,6 +5,27 @@ _G[n.."WidthSlider"]
 h:SetMinMaxValues(1,150)
 w:SetMinMaxValues(1,150)
 
+local function hideBackgrounds()
+  local raidFrameBackgroundAlpha = .4
+  local index = 1
+  local frame
+
+  repeat
+    frame = _G["CompactRaidFrame"..index]
+    if frame then
+      -- frame.background:Hide()
+      frame.background:SetAlpha(raidFrameBackgroundAlpha)
+    end
+    index = index + 1
+  until not frame
+end
+
+hideBackgrounds()
+
+hooksecurefunc("CompactRaidFrameContainer_AddUnitFrame", hideBackgrounds)
+
+
+
 hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame,numbuffs)
 
   local buffscale = 1.25;
@@ -24,17 +45,20 @@ hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
   local name = frame.name;
   local playerName = GetUnitName(frame.unit, true);
 
-  name:ClearAllPoints();
-  name:SetPoint("TOPLEFT", 5, -5);
+  hideBackgrounds();
 
   if (playerName) then
     local nameWithoutRealm = gsub(playerName, "%-[^|]+", "");
     name:SetText(nameWithoutRealm);
+    name:SetScale(0.9);
   end
 
   if InCombatLockdown() then
     name:SetAlpha(0.15);
   else
+    name:ClearAllPoints();
+    name:SetPoint("TOPLEFT", 5, -5);
+
     name:SetAlpha(1);
   end
 
@@ -45,7 +69,7 @@ hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
   if not icon then
     return;
   end
-
+  icon:SetScale(0.8);
   local offset = icon:GetWidth() / 4;
 
   icon:ClearAllPoints();
@@ -61,15 +85,27 @@ end);
 
 local function sortCompactRaidFrameContainer(frame)
 
+  if InCombatLockdown() then
+    return;
+  end
+
   if ( not frame.groupMode) then
     return;
   end
 
   LoadAddOn("CompactRaidFrameContainer");
 
+  -- local amountUnitFrames = 0;
+  -- repeat
+  --   local frame = _G["CompactRaidFrame"..index]
+  --   if frame then
+  --     amountUnitFrames = amountUnitFrames + 1
+  --   end
+  -- until not frame
+
   local amountUnitFrames = frame:GetNumChildren();
-  print("Updating raid frames, should it sort? Amount frames: " .. amountUnitFrames);
-  if (amountUnitFrames < 6) then
+
+  if (amountUnitFrames < 9) then
 
     local Sort_GroupAscending_PlayerBottom = function(t1, t2)
       if UnitIsUnit(t1, "player") then
@@ -88,7 +124,16 @@ local function sortCompactRaidFrameContainer(frame)
 
 end
 
-hooksecurefunc("CompactRaidFrameContainer_UpdateDisplayedUnits", function(frame)
-  sortCompactRaidFrameContainer(frame);
+-- hooksecurefunc("CompactRaidFrameContainer_UpdateDisplayedUnits", function(frame)
+--   sortCompactRaidFrameContainer(frame);
+-- end);
+
+hooksecurefunc("CompactRaidFrameContainer_UpdateDisplayedUnits", sortCompactRaidFrameContainer)
+
+hooksecurefunc("CompactUnitFrame_UtilSetDebuff" , function(debuffFrame, unit, index, filter, isBossAura, isBossBuff)
+  debuffFrame.count:SetScale(0.8);
 end);
+
+
+sortCompactRaidFrameContainer(CompactRaidFrameContainer);
 
