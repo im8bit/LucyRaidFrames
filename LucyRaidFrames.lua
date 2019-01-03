@@ -20,13 +20,9 @@ local function hideBackgrounds()
   until not frame
 end
 
-hideBackgrounds()
+hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", hideBackgrounds)
 
-hooksecurefunc("CompactRaidFrameContainer_AddUnitFrame", hideBackgrounds)
-
-
-
-hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame,numbuffs)
+hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame, numbuffs)
 
   local buffscale = 1.25;
   local debuffscale = 1.1;
@@ -95,18 +91,9 @@ local function sortCompactRaidFrameContainer(frame)
 
   LoadAddOn("CompactRaidFrameContainer");
 
-  -- local amountUnitFrames = 0;
-  -- repeat
-  --   local frame = _G["CompactRaidFrame"..index]
-  --   if frame then
-  --     amountUnitFrames = amountUnitFrames + 1
-  --   end
-  -- until not frame
+  local amountUnitFrames = GetNumGroupMembers();
 
-  local amountUnitFrames = frame:GetNumChildren();
-
-  if (amountUnitFrames < 9) then
-
+  if not frame.LucyRaidFramesSorting then
     local Sort_GroupAscending_PlayerBottom = function(t1, t2)
       if UnitIsUnit(t1, "player") then
         return false;
@@ -116,24 +103,22 @@ local function sortCompactRaidFrameContainer(frame)
         return t1 < t2;
       end
     end
-
-    CompactRaidFrameContainer_SetFlowSortFunction(frame, Sort_GroupAscending_PlayerBottom);
-    CompactRaidFrameContainer_TryUpdate(frame);
+    frame.LucyRaidFramesSorting = Sort_GroupAscending_PlayerBottom;
   end
 
+  if (amountUnitFrames < 6) then
+    -- Using actual hook for this causes infinite looping, cant find a good hook to use in combination with it...
+    -- CompactRaidFrameContainer_SetFlowSortFunction(frame, frame.LucyRaidFramesSorting);
+    frame.flowSortFunc = frame.LucyRaidFramesSorting;
+    CompactRaidFrameContainer_ReleaseAllReservedFrames(frame);
+    CompactRaidFrameContainer_UpdateDisplayedUnits(frame);
+  end
 
 end
 
--- hooksecurefunc("CompactRaidFrameContainer_UpdateDisplayedUnits", function(frame)
---   sortCompactRaidFrameContainer(frame);
--- end);
-
-hooksecurefunc("CompactRaidFrameContainer_UpdateDisplayedUnits", sortCompactRaidFrameContainer)
+hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", sortCompactRaidFrameContainer)
 
 hooksecurefunc("CompactUnitFrame_UtilSetDebuff" , function(debuffFrame, unit, index, filter, isBossAura, isBossBuff)
   debuffFrame.count:SetScale(0.8);
 end);
-
-
-sortCompactRaidFrameContainer(CompactRaidFrameContainer);
 
