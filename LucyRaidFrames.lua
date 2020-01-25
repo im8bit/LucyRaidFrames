@@ -5,14 +5,22 @@ _G[n.."WidthSlider"]
 h:SetMinMaxValues(1,150)
 w:SetMinMaxValues(1,150)
 
+LucyRaidFrames = CreateFrame("FRAME", "LucyRaidFrame")
+
+LucyRaidFrames:RegisterEvent("PLAYER_REGEN_ENABLED")
+LucyRaidFrames:RegisterEvent("PLAYER_REGEN_DISABLED")
+
+
 local function hideBackgrounds()
+  if GetNumGroupMembers() == 0 then return end
+
   local raidFrameBackgroundAlpha = .4
   local index = 1
   local frame
-
   repeat
     frame = _G["CompactRaidFrame"..index]
     if frame then
+      if frame:IsForbidden() then return end --!!!
       -- frame.background:Hide()
       frame.background:SetAlpha(raidFrameBackgroundAlpha)
     end
@@ -20,9 +28,8 @@ local function hideBackgrounds()
   until not frame
 end
 
-hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", hideBackgrounds)
-
 hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame, numbuffs)
+  if frame:IsForbidden() then return end --!!!
 
   local buffscale = 1.25;
   local debuffscale = 1.1;
@@ -38,10 +45,10 @@ hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame, numbuffs)
 end);
 
 hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
+  if frame:IsForbidden() then return end --!!!
+
   local name = frame.name;
   local playerName = GetUnitName(frame.unit, true);
-
-  hideBackgrounds();
 
   if (playerName) then
     local nameWithoutRealm = gsub(playerName, "%-[^|]+", "");
@@ -61,6 +68,8 @@ hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
 end);
 
 hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
+  if frame:IsForbidden() then return end --!!!
+
   local icon = frame.roleIcon;
   if not icon then
     return;
@@ -79,46 +88,54 @@ hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", function(frame)
 
 end);
 
-local function sortCompactRaidFrameContainer(frame)
-
-  if InCombatLockdown() then
-    return;
+local function Sort_GroupAscending_PlayerBottom(t1, t2)
+  if UnitIsUnit(t1, "player") then
+    return false;
+  elseif UnitIsUnit(t2, "player") then
+    return true;
   end
-
-  if ( not frame.groupMode) then
-    return;
-  end
-
-  LoadAddOn("CompactRaidFrameContainer");
-
-  local amountUnitFrames = GetNumGroupMembers();
-
-  if not frame.LucyRaidFramesSorting then
-    local Sort_GroupAscending_PlayerBottom = function(t1, t2)
-      if UnitIsUnit(t1, "player") then
-        return false;
-      elseif UnitIsUnit(t2, "player") then
-        return true;
-      else
-        return t1 < t2;
-      end
-    end
-    frame.LucyRaidFramesSorting = Sort_GroupAscending_PlayerBottom;
-  end
-
-  if (amountUnitFrames < 6) then
-    -- Using actual hook for this causes infinite looping, cant find a good hook to use in combination with it...
-    -- CompactRaidFrameContainer_SetFlowSortFunction(frame, frame.LucyRaidFramesSorting);
-    frame.flowSortFunc = frame.LucyRaidFramesSorting;
-    CompactRaidFrameContainer_ReleaseAllReservedFrames(frame);
-    CompactRaidFrameContainer_UpdateDisplayedUnits(frame);
-  end
-
+  return t1 < t2;
 end
 
-hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", sortCompactRaidFrameContainer)
 
-hooksecurefunc("CompactUnitFrame_UtilSetDebuff" , function(debuffFrame, unit, index, filter, isBossAura, isBossBuff)
-  debuffFrame.count:SetScale(0.8);
+function LucyRaidFrames_Sort(frame)
+  if (
+    GetNumGroupMembers() > 5 or
+    frame:IsForbidden() or
+    InCombatLockdown() or
+    not frame.groupMode
+  ) then
+    return
+  end
+  CompactRaidFrameContainer_SetFlowSortFunction(frame, Sort_GroupAscending_PlayerBottom);
+end
+
+hooksecurefunc("CompactUnitFrame_UtilSetDebuff" , function(frame, unit, index, filter, isBossAura, isBossBuff)
+  if frame:IsForbidden() then return end --!!!
+  frame.count:SetScale(0.8);
 end);
+
+
+hooksecurefunc("CompactRaidFrameContainer_OnEvent", function(self, event, ...)
+  if ( event == "GROUP_ROSTER_UPDATE" ) then
+    LucyRaidFrames_Sort(self);
+  end
+end);
+
+CompactRaidFrameManager:HookScript("OnEvent", function(self, event, ...)
+  if (
+    event == "PLAYER_ENTERING_WORLD" or
+    event == "PLAYER_TARGET_CHANGED"
+  ) then
+    LucyRaidFrames_Sort(self.container)
+    hideBackgrounds();
+  end
+end)
+
+LucyRaidFrames:SetScript("OnEvent", function(self, event, ...)
+  if (event == "PLAYER_REGEN_ENABLED") then
+    CompactRaidFrameContainer_TryUpdate(CompactRaidFrameContainer)
+  end
+end);
+
 
