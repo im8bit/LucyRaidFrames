@@ -13,19 +13,20 @@ LucyRaidFrames:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 local function hideBackgrounds()
   if GetNumGroupMembers() == 0 then return end
-
-  local raidFrameBackgroundAlpha = .4
-  local index = 1
-  local frame
-  repeat
-    frame = _G["CompactRaidFrame"..index]
-    if frame then
-      if frame:IsForbidden() then return end --!!!
-      -- frame.background:Hide()
-      frame.background:SetAlpha(raidFrameBackgroundAlpha)
-    end
-    index = index + 1
-  until not frame
+  C_Timer.After(0.3, function()
+    local raidFrameBackgroundAlpha = .4
+    local index = 1
+    local frame
+    repeat
+      frame = _G["CompactRaidFrame"..index]
+      if frame then
+        if frame:IsForbidden() then return end --!!!
+        -- frame.background:Hide()
+        frame.background:SetAlpha(raidFrameBackgroundAlpha)
+      end
+      index = index + 1
+    until not frame
+  end)
 end
 
 hooksecurefunc("CompactUnitFrame_SetMaxBuffs", function(frame, numbuffs)
