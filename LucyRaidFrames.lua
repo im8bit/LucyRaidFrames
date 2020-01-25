@@ -1,15 +1,29 @@
---This is how you make the raid frames even more resizable :) you can also put all this in one line and just use a macro in game.
-local n,w,h="CompactUnitFrameProfilesGeneralOptionsFrame" h,w=
-_G[n.."HeightSlider"],
-_G[n.."WidthSlider"]
-h:SetMinMaxValues(1,150)
-w:SetMinMaxValues(1,150)
+LucyRaidFrames = LibStub("AceAddon-3.0"):NewAddon("LucyRaidFrames", "AceConsole-3.0",  "AceEvent-3.0")
 
-LucyRaidFrames = CreateFrame("FRAME", "LucyRaidFrame")
+function LucyRaidFrames:OnInitialize()
+  self:Print('it initialized');
 
-LucyRaidFrames:RegisterEvent("PLAYER_REGEN_ENABLED")
-LucyRaidFrames:RegisterEvent("PLAYER_REGEN_DISABLED")
+end
 
+function LucyRaidFrames:OnEnable()
+  --This is how you make the raid frames even more resizable :) you can also put all this in one line and just use a macro in game.
+  local n,w,h="CompactUnitFrameProfilesGeneralOptionsFrame" h,w=
+  _G[n.."HeightSlider"],
+  _G[n.."WidthSlider"]
+  h:SetMinMaxValues(1,150)
+  w:SetMinMaxValues(1,150)
+
+  self:Print('it enabled')
+  self:RegisterEvent("PLAYER_REGEN_ENABLED")
+end
+
+function LucyRaidFrames:OnDisable()
+  self:Print('it disabled')
+end
+
+function LucyRaidFrames:PLAYER_REGEN_ENABLED(event)
+  CompactRaidFrameContainer_TryUpdate(CompactRaidFrameContainer);
+end
 
 local function hideBackgrounds()
   if GetNumGroupMembers() == 0 then return end
@@ -132,11 +146,4 @@ CompactRaidFrameManager:HookScript("OnEvent", function(self, event, ...)
     hideBackgrounds();
   end
 end)
-
-LucyRaidFrames:SetScript("OnEvent", function(self, event, ...)
-  if (event == "PLAYER_REGEN_ENABLED") then
-    CompactRaidFrameContainer_TryUpdate(CompactRaidFrameContainer)
-  end
-end);
-
 

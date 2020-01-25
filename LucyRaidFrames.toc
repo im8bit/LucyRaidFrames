@@ -3,10 +3,11 @@
 ## Notes: Adjusts Blizzards CompactRaidFrames to my own preferences
 ## Version: 0.0.1
 ## Author: LucyON
-## SavedVariables: globalSettings
-## SavedVariablesPerCharacter: characterSettings
+## SavedVariables: LucyRaidFrames
 
 ## X-License: MIT
 ## X-Category: Unit Frames
+
+embeds.xml
 
 LucyRaidFrames.lua
