@@ -15,6 +15,9 @@ local anchorOptions = {
 addon.defaultSettings = {
   profile = {
 		enable = true,
+		background = {
+			alpha = 0.4
+		},
 		sorting = {
 			enable = true
 		},
@@ -49,7 +52,7 @@ addon.defaultSettings = {
 }
 
 addon.options = {
-  type = "group",
+	type = "group",
   args = {
 		generalGroup = {
 			type = "group",
@@ -62,8 +65,8 @@ addon.options = {
 					name = "Enable",
 					desc = "Enables / disables all functionality",
 					type = "toggle",
-					set = function(info,val) addon.db.profile.enable = val  end,
-					get = function(info) return addon.db.profile.enable end
+					get = function(info) return addon.db.profile.enable end,
+					set = function(info,val) addon.db.profile.enable = val end
 				},
 				sortingEnabled = {
 					order = 2,
@@ -72,7 +75,19 @@ addon.options = {
 					type = "toggle",
 					set = function(_, val) addon.db.profile.sorting.enable = val; lrf:sort(CompactRaidFrameContainer) end,
 					get = function() return addon.db.profile.sorting.enable end,
-				}
+				},
+				backgroundAlpha = {
+					order = 3,
+					type = "range",
+					name = "Background Alpha",
+					desc = "Fade out the background of the raidframes",
+					min = 0,
+					max = 1,
+					step = 0.01,
+					isPercent = true,
+					get = function() return addon.db.profile.background.alpha end,
+					set = function(_, val) addon.db.profile.background.alpha = val; addon.lrf:hideBackgrounds() end,
+				},
 			}
 		},
 		aurasGroup = {

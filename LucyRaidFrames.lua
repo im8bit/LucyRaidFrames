@@ -1,7 +1,7 @@
 local AddonName, addon = ...
 
-addon.LucyRaidFrames = LibStub("AceAddon-3.0"):NewAddon(AddonName, "AceConsole-3.0",  "AceEvent-3.0")
-lrf = addon.LucyRaidFrames
+addon.lrf = LibStub("AceAddon-3.0"):NewAddon(AddonName, "AceConsole-3.0",  "AceEvent-3.0")
+lrf = addon.lrf
 
 AceConfig = LibStub("AceConfig-3.0")
 AceDialog = LibStub("AceConfigDialog-3.0")
@@ -45,11 +45,13 @@ function lrf:forEveryCRF(func)
 end
 
 function lrf:hideBackgrounds()
-  if GetNumGroupMembers() == 0 then return end
-  local raidFrameBackgroundAlpha = .4
+  if (
+    GetNumGroupMembers() == 0 or
+    addon.db.profile.background.alpha == 1
+  ) then return end
   C_Timer.After(0.3, function()
     lrf:forEveryCRF(function(frame)
-      frame.background:SetAlpha(raidFrameBackgroundAlpha)
+      frame.background:SetAlpha(addon.db.profile.background.alpha)
     end)
   end)
 end
