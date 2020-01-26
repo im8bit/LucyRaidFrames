@@ -1,7 +1,7 @@
 local AddonName, addon = ...
 
 addon.LucyRaidFrames = LibStub("AceAddon-3.0"):NewAddon(AddonName, "AceConsole-3.0",  "AceEvent-3.0")
-lfr = addon.LucyRaidFrames
+lrf = addon.LucyRaidFrames
 
 AceConfig = LibStub("AceConfig-3.0")
 AceDialog = LibStub("AceConfigDialog-3.0")
@@ -10,29 +10,32 @@ AceDialog = LibStub("AceConfigDialog-3.0")
 -- SETUP --
 -----------
 
-function lfr:OnInitialize()
+function lrf:OnInitialize()
   addon.db = LibStub("AceDB-3.0"):New(AddonName .."DB", addon.defaultSettings, true)
-  AceConfig:RegisterOptionsTable(AddonName, addon.options, {"/lfr"})
+  AceConfig:RegisterOptionsTable(AddonName, addon.options, {"/lrf", "/lucyraidframes"})
   AceDialog:AddToBlizOptions(AddonName, AddonName)
 end
 
-function lfr:OnEnable()
-  self:RegisterEvents();
-  self:adjustFrameSizeSliders();
+function lrf:OnEnable()
+  if addon.db.profile.enable  then
+    self:RegisterEvents();
+    self:adjustFrameSizeSliders();
+    self:CRFHooker();
+  end
 end
 
-function lfr:OnDisable()
+function lrf:OnDisable()
 end
 
 --------------------
 -- EVENT HANDLERS --
 --------------------
 
-function lfr:RegisterEvents()
+function lrf:RegisterEvents()
   self:RegisterEvent("PLAYER_REGEN_ENABLED")
 end
 
-function lfr:PLAYER_REGEN_ENABLED(event)
+function lrf:PLAYER_REGEN_ENABLED(event)
   CompactRaidFrameContainer_TryUpdate(CompactRaidFrameContainer);
 end
 
@@ -40,7 +43,7 @@ end
 -- OTHER FUNCTIONS --
 ---------------------
 
-function lfr:adjustFrameSizeSliders()
+function lrf:adjustFrameSizeSliders()
   --This is how you make the raid frames even more resizable :) you can also put all this in one line and just use a macro in game.
   local n,w,h="CompactUnitFrameProfilesGeneralOptionsFrame" h,w=
   _G[n.."HeightSlider"],
@@ -49,7 +52,7 @@ function lfr:adjustFrameSizeSliders()
   w:SetMinMaxValues(1,150)
 end
 
-function lfr:hideBackgrounds()
+function lrf:hideBackgrounds()
   if GetNumGroupMembers() == 0 then return end
   C_Timer.After(0.3, function()
     local raidFrameBackgroundAlpha = .4
@@ -77,7 +80,7 @@ local function Sort_GroupAscending_PlayerBottom(t1, t2)
 end
 
 
-function LucyRaidFrames_Sort(frame)
+function lrf:sort(frame)
   if (
     GetNumGroupMembers() > 5 or
     frame:IsForbidden() or
@@ -89,9 +92,9 @@ function LucyRaidFrames_Sort(frame)
   CompactRaidFrameContainer_SetFlowSortFunction(frame, Sort_GroupAscending_PlayerBottom);
 end
 
-----------------------------------
--- HOOKS TO BLIZZARD RAIDFRAMES --
-----------------------------------
+------------------------------------
+-- BLIZZARD RAIDFRAME ALTERATIONS --
+------------------------------------
 
 local function SetMaxBuffs(frame, numbuffs)
   if frame:IsForbidden() then return end --!!!
@@ -159,7 +162,7 @@ end
 
 local function CRFContainerOnEvent(self, event, ...)
   if ( event == "GROUP_ROSTER_UPDATE" ) then
-    LucyRaidFrames_Sort(self);
+    lrf:sort(self);
   end
 end
 
@@ -168,20 +171,16 @@ local function CRFManagerOnEvent(self, event, ...)
     event == "PLAYER_ENTERING_WORLD" or
     event == "PLAYER_TARGET_CHANGED"
   ) then
-    LucyRaidFrames_Sort(self.container)
-    lfr:hideBackgrounds();
+    lrf:sort(self.container)
+    lrf:hideBackgrounds();
   end
 end
 
-hooksecurefunc("CompactUnitFrame_SetMaxBuffs", SetMaxBuffs);
-
-hooksecurefunc("CompactUnitFrame_UpdateName", UpdateName);
-
-hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", UpdateRoleIcon);
-
-hooksecurefunc("CompactUnitFrame_UtilSetDebuff", UtilSetDebuff);
-
-hooksecurefunc("CompactRaidFrameContainer_OnEvent", CRFContainerOnEvent);
-
-CompactRaidFrameManager:HookScript("OnEvent", CRFManagerOnEvent)
-
+function lrf:CRFHooker()
+  hooksecurefunc("CompactUnitFrame_SetMaxBuffs", SetMaxBuffs);
+  hooksecurefunc("CompactUnitFrame_UpdateName", UpdateName);
+  hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", UpdateRoleIcon);
+  hooksecurefunc("CompactUnitFrame_UtilSetDebuff", UtilSetDebuff);
+  hooksecurefunc("CompactRaidFrameContainer_OnEvent", CRFContainerOnEvent);
+  CompactRaidFrameManager:HookScript("OnEvent", CRFManagerOnEvent)
+end
