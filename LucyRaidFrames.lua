@@ -6,27 +6,6 @@ lrf = addon.LucyRaidFrames
 AceConfig = LibStub("AceConfig-3.0")
 AceDialog = LibStub("AceConfigDialog-3.0")
 
------------
--- SETUP --
------------
-
-function lrf:OnInitialize()
-  addon.db = LibStub("AceDB-3.0"):New(AddonName .."DB", addon.defaultSettings, true)
-  AceConfig:RegisterOptionsTable(AddonName, addon.options, {"/lrf", "/lucyraidframes"})
-  AceDialog:AddToBlizOptions(AddonName, AddonName)
-end
-
-function lrf:OnEnable()
-  if addon.db.profile.enable  then
-    self:RegisterEvents();
-    self:adjustFrameSizeSliders();
-    self:CRFHooker();
-  end
-end
-
-function lrf:OnDisable()
-end
-
 --------------------
 -- EVENT HANDLERS --
 --------------------
@@ -99,8 +78,8 @@ end
 local function SetMaxBuffs(frame, numbuffs)
   if frame:IsForbidden() then return end --!!!
 
-  local buffscale = 1.25;
-  local debuffscale = 1.1;
+  local buffscale = addon.db.profile.auras.scaling.buffs;
+  local debuffscale = addon.db.profile.auras.scaling.debuffs;
 
   for i=1, #frame.buffFrames do
     frame.buffFrames[i]:SetScale(buffscale);
@@ -124,13 +103,18 @@ local function UpdateName(frame)
     name:SetScale(0.9);
   end
 
-  if InCombatLockdown() then
-    name:SetAlpha(0.15);
-  else
-    name:ClearAllPoints();
-    name:SetPoint("TOPLEFT", 5, -5);
-
-    name:SetAlpha(1);
+  if (addon.db.profile.names.alpha.enable) then
+    if InCombatLockdown() then
+      name:SetAlpha(addon.db.profile.names.alpha.combat);
+    else
+      name:ClearAllPoints();
+      name:SetPoint(
+        addon.db.profile.names.position.anchor,
+        addon.db.profile.names.position.x,
+        addon.db.profile.names.position.y
+      );
+      name:SetAlpha(addon.db.profile.names.alpha.noCombat);
+    end
   end
 
 end
@@ -157,7 +141,7 @@ end
 
 local function UtilSetDebuff(frame, unit, index, filter, isBossAura, isBossBuff)
   if frame:IsForbidden() then return end --!!!
-  frame.count:SetScale(0.8);
+  frame.count:SetScale(0.7);
 end
 
 local function CRFContainerOnEvent(self, event, ...)
@@ -177,10 +161,34 @@ local function CRFManagerOnEvent(self, event, ...)
 end
 
 function lrf:CRFHooker()
-  hooksecurefunc("CompactUnitFrame_SetMaxBuffs", SetMaxBuffs);
+  if (addon.db.profile.auras.scaling.enable) then
+    hooksecurefunc("CompactUnitFrame_SetMaxBuffs", SetMaxBuffs);
+  end
   hooksecurefunc("CompactUnitFrame_UpdateName", UpdateName);
   hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", UpdateRoleIcon);
   hooksecurefunc("CompactUnitFrame_UtilSetDebuff", UtilSetDebuff);
   hooksecurefunc("CompactRaidFrameContainer_OnEvent", CRFContainerOnEvent);
   CompactRaidFrameManager:HookScript("OnEvent", CRFManagerOnEvent)
 end
+
+-----------
+-- SETUP --
+-----------
+
+function lrf:OnInitialize()
+  addon.db = LibStub("AceDB-3.0"):New(AddonName .."DB", addon.defaultSettings, true)
+  AceConfig:RegisterOptionsTable(AddonName, addon.options, {"/lrf", "/lucyraidframes"})
+  AceDialog:AddToBlizOptions(AddonName, AddonName)
+end
+
+function lrf:OnEnable()
+  if addon.db.profile.enable  then
+    self:RegisterEvents();
+    self:adjustFrameSizeSliders();
+    self:CRFHooker();
+  end
+end
+
+function lrf:OnDisable()
+end
+
