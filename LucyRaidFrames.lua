@@ -98,9 +98,11 @@ local function UpdateName(frame)
   local playerName = GetUnitName(frame.unit, true);
 
   if (playerName) then
-    local nameWithoutRealm = gsub(playerName, "%-[^|]+", "");
-    name:SetText(nameWithoutRealm);
-    name:SetScale(0.9);
+    if (addon.db.profile.names.hideServerName) then
+      local nameWithoutRealm = gsub(playerName, "%-[^|]+", "");
+      name:SetText(nameWithoutRealm);
+    end
+    name:SetScale(addon.db.profile.names.scale);
   end
 
   if (addon.db.profile.names.alpha.enable) then

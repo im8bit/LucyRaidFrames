@@ -10,7 +10,6 @@ local anchorOptions = {
 	["LEFT"] = "LEFT",
 	["RIGHT"] = "RIGHT",
 	["CENTER"] = "CENTER",
-
 }
 
 addon.defaultSettings = {
@@ -29,6 +28,8 @@ addon.defaultSettings = {
 			}
 		},
 		names = {
+			hideServerName = true,
+			scale = 0.9,
 			alpha = {
 				enable = true,
 				combat = 0.15,
@@ -137,7 +138,8 @@ addon.options = {
 					order = 2.1,
 					desc = "Modify the max amount of buffs/debuffs shown",
 					set = function(info,val) addon.db.profile.auras.amount.enable = val  end,
-					get = function(info) return addon.db.profile.auras.amount.enable end
+					get = function(info) return addon.db.profile.auras.amount.enable end,
+					disabled = true
 				},
 				buffAmount = {
 					order = 2.2,
@@ -167,10 +169,33 @@ addon.options = {
 		},
 		nameGroup = {
 			type = "group",
-			name = "Character Name",
+			name = "Names",
 			order = 2,
 			inline = true,
 			args = {
+				generalHeader = {
+					type = "header",
+					name = "General",
+					order = 0,
+				},
+				hideServerName = {
+					type = "toggle",
+					name = "Hide servernames",
+					order = 0.1,
+					set = function(info,val) addon.db.profile.names.hideServerName = val  end,
+					get = function(info) return addon.db.profile.names.hideServerName end
+				},
+				nameScale = {
+					order = 0.2,
+					type = "range",
+					name = "Scale",
+					min = 0,
+					max = 2,
+					step = 0.01,
+					isPercent = true,
+					get = function() return addon.db.profile.names.scale end,
+					set = function(_, val) addon.db.profile.names.scale = val end,
+				},
 				alphaHeader = {
 					type = "header",
 					name = "Alpha",
@@ -178,7 +203,7 @@ addon.options = {
 				},
 				alphaEnable = {
 					type = "toggle",
-					name = "Enable",
+					name = "Fade out names",
 					order = 1.1,
 					desc = "Set an alpha fade on character names",
 					set = function(info,val) addon.db.profile.names.alpha.enable = val  end,
