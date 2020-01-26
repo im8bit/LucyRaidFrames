@@ -22,6 +22,12 @@ end
 -- OTHER FUNCTIONS --
 ---------------------
 
+function lrf:tryUpdate()
+  self:forEveryCRF(lrf.UpdateName)
+  self:forEveryCRF(lrf.SetMaxBuffs)
+  self:sort(CompactRaidFrameContainer)
+end
+
 function lrf:adjustFrameSizeSliders()
   --This is how you make the raid frames even more resizable :) you can also put all this in one line and just use a macro in game.
   local n,w,h="CompactUnitFrameProfilesGeneralOptionsFrame" h,w=
@@ -56,14 +62,16 @@ function lrf:hideBackgrounds()
   end)
 end
 
-local function Sort_GroupAscending_PlayerBottom(t1, t2)
-  if UnitIsUnit(t1, "player") then
-    return false;
-  elseif UnitIsUnit(t2, "player") then
-    return true;
+lrf.sortings = {
+  GroupAscending_PlayerBottom = function(t1, t2)
+    if UnitIsUnit(t1, "player") then
+      return false;
+    elseif UnitIsUnit(t2, "player") then
+      return true;
+    end
+    return t1 < t2;
   end
-  return t1 < t2;
-end
+}
 
 function lrf:sort(frame)
   if (
@@ -75,14 +83,14 @@ function lrf:sort(frame)
   ) then
     return
   end
-  CompactRaidFrameContainer_SetFlowSortFunction(frame, Sort_GroupAscending_PlayerBottom);
+  CompactRaidFrameContainer_SetFlowSortFunction(frame, lrf.sortings.GroupAscending_PlayerBottom);
 end
 
 ------------------------------------
 -- BLIZZARD RAIDFRAME ALTERATIONS --
 ------------------------------------
 
-local function SetMaxBuffs(frame)
+ lrf.SetMaxBuffs = function(frame)
   if frame:IsForbidden() then return end --!!!
 
   local buffscale = addon.db.profile.auras.scaling.buffs;
@@ -98,7 +106,7 @@ local function SetMaxBuffs(frame)
 
 end
 
-local function UpdateName(frame)
+lrf.UpdateName = function(frame)
   if frame:IsForbidden() then return end --!!!
 
   local name = frame.name;
@@ -125,10 +133,9 @@ local function UpdateName(frame)
       name:SetAlpha(addon.db.profile.names.alpha.noCombat);
     end
   end
-
 end
 
-local function UpdateRoleIcon(frame)
+lrf.UpdateRoleIcon = function(frame)
   if frame:IsForbidden() then return end --!!!
 
   local icon = frame.roleIcon;
@@ -148,37 +155,37 @@ local function UpdateRoleIcon(frame)
   end
 end
 
-local function UtilSetDebuff(frame)
+lrf.UtilSetDebuff = function(frame)
   if frame:IsForbidden() then return end --!!!
   frame.count:SetScale(0.7);
 end
 
-local function CRFContainerOnEvent(self, event, ...)
+lrf.CRFContainerOnEvent = function(self, event, ...)
   if ( event == "GROUP_ROSTER_UPDATE" ) then
     lrf:sort(self);
   end
 end
 
-local function CRFManagerOnEvent(self, event, ...)
+lrf.CRFManagerOnEvent = function(self, event, ...)
   if (
     event == "PLAYER_ENTERING_WORLD" or
     event == "PLAYER_TARGET_CHANGED"
   ) then
     lrf:sort(self.container)
     lrf:hideBackgrounds();
-    lrf:forEveryCRF(SetMaxBuffs)
+    lrf:forEveryCRF(lrf.SetMaxBuffs)
   end
 end
 
 function lrf:CRFHooker()
   if (addon.db.profile.auras.scaling.enable) then
-    hooksecurefunc("CompactUnitFrame_SetMaxBuffs", SetMaxBuffs);
+    hooksecurefunc("CompactUnitFrame_SetMaxBuffs", lrf.SetMaxBuffs);
   end
-  hooksecurefunc("CompactUnitFrame_UpdateName", UpdateName);
-  hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", UpdateRoleIcon);
-  hooksecurefunc("CompactUnitFrame_UtilSetDebuff", UtilSetDebuff);
-  hooksecurefunc("CompactRaidFrameContainer_OnEvent", CRFContainerOnEvent);
-  CompactRaidFrameManager:HookScript("OnEvent", CRFManagerOnEvent)
+  hooksecurefunc("CompactUnitFrame_UpdateName", lrf.UpdateName);
+  hooksecurefunc("CompactUnitFrame_UpdateRoleIcon", lrf.UpdateRoleIcon);
+  hooksecurefunc("CompactUnitFrame_UtilSetDebuff", lrf.UtilSetDebuff);
+  hooksecurefunc("CompactRaidFrameContainer_OnEvent", lrf.CRFContainerOnEvent);
+  CompactRaidFrameManager:HookScript("OnEvent", lrf.CRFManagerOnEvent)
 end
 
 -----------

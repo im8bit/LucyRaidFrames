@@ -106,7 +106,7 @@ addon.options = {
 					name = "Enable",
 					order = 1.1,
 					desc = "Enables / disables scaling of buffs & debuffs",
-					set = function(info,val) addon.db.profile.auras.scaling.enable = val  end,
+					set = function(info,val) addon.db.profile.auras.scaling.enable = val; addon.lrf:tryUpdate() end,
 					get = function(info) return addon.db.profile.auras.scaling.enable end
 				},
 				buffScale = {
@@ -119,7 +119,7 @@ addon.options = {
 					step = 0.01,
 					isPercent = true,
 					get = function() return addon.db.profile.auras.scaling.buffs end,
-					set = function(_, val) addon.db.profile.auras.scaling.buffs = val end,
+					set = function(_, val) addon.db.profile.auras.scaling.buffs = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.auras.scaling.enable end
 				},
 				debuffScale = {
@@ -132,7 +132,7 @@ addon.options = {
 					step = 0.01,
 					isPercent = true,
 					get = function() return addon.db.profile.auras.scaling.debuffs end,
-					set = function(_, val) addon.db.profile.auras.scaling.debuffs = val end,
+					set = function(_, val) addon.db.profile.auras.scaling.debuffs = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.auras.scaling.enable end
 				},
 				amountHeader = {
@@ -145,7 +145,7 @@ addon.options = {
 					name = "Enable",
 					order = 2.1,
 					desc = "Modify the max amount of buffs/debuffs shown",
-					set = function(info,val) addon.db.profile.auras.amount.enable = val  end,
+					set = function(info,val) addon.db.profile.auras.amount.enable = val; addon.lrf:tryUpdate()  end,
 					get = function(info) return addon.db.profile.auras.amount.enable end,
 					disabled = true
 				},
@@ -158,7 +158,7 @@ addon.options = {
 					max = 10,
 					step = 1,
 					get = function() return addon.db.profile.auras.amount.buffs end,
-					set = function(_, val) addon.db.profile.auras.amount.buffs = val end,
+					set = function(_, val) addon.db.profile.auras.amount.buffs = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.auras.amount.enable end
 				},
 				debuffAmount = {
@@ -170,7 +170,7 @@ addon.options = {
 					max = 10,
 					step = 1,
 					get = function() return addon.db.profile.auras.amount.debuffs end,
-					set = function(_, val) addon.db.profile.auras.amount.debuffs = val end,
+					set = function(_, val) addon.db.profile.auras.amount.debuffs = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.auras.amount.enable end
 				}
 			}
@@ -185,7 +185,7 @@ addon.options = {
 					type = "toggle",
 					name = "Hide servernames",
 					order = 0.1,
-					set = function(info,val) addon.db.profile.names.hideServerName = val end,
+					set = function(info,val) addon.db.profile.names.hideServerName = val; addon.lrf:tryUpdate() end,
 					get = function(info) return addon.db.profile.names.hideServerName end
 				},
 				nameScale = {
@@ -197,7 +197,7 @@ addon.options = {
 					step = 0.01,
 					isPercent = true,
 					get = function() return addon.db.profile.names.scale end,
-					set = function(_, val) addon.db.profile.names.scale = val end,
+					set = function(_, val) addon.db.profile.names.scale = val; addon.lrf:tryUpdate() end,
 				},
 				alphaHeader = {
 					type = "header",
@@ -209,7 +209,7 @@ addon.options = {
 					name = "Fade out names",
 					order = 1.1,
 					desc = "Set an alpha fade on character names",
-					set = function(info,val) addon.db.profile.names.alpha.enable = val  end,
+					set = function(info,val) addon.db.profile.names.alpha.enable = val; addon.lrf:tryUpdate()  end,
 					get = function(info) return addon.db.profile.names.alpha.enable end
 				},
 				alphaNoCombat = {
@@ -221,7 +221,7 @@ addon.options = {
 					step = 0.01,
 					isPercent = true,
 					get = function() return addon.db.profile.names.alpha.noCombat end,
-					set = function(_, val) addon.db.profile.names.alpha.noCombat = val end,
+					set = function(_, val) addon.db.profile.names.alpha.noCombat = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.names.alpha.enable end
 				},
 				alphaCombat = {
@@ -233,7 +233,7 @@ addon.options = {
 					step = 0.01,
 					isPercent = true,
 					get = function() return addon.db.profile.names.alpha.combat end,
-					set = function(_, val) addon.db.profile.names.alpha.combat = val end,
+					set = function(_, val) addon.db.profile.names.alpha.combat = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.names.alpha.enable end
 				},
 				positionHeader = {
@@ -248,7 +248,7 @@ addon.options = {
 					order = 2.1,
 					values = anchorOptions,
 					get = function() return addon.db.profile.names.position.anchor end,
-					set = function(_, val) addon.db.profile.names.position.anchor = val; print("anchor " .. val) end
+					set = function(_, val) addon.db.profile.names.position.anchor = val; addon.lrf:tryUpdate() end
 				},
 				positionX = {
 					order = 2.2,
@@ -258,8 +258,8 @@ addon.options = {
 					max = 200,
 					step = 1,
 					get = function() return addon.db.profile.names.position.x end,
-					set = function(_, val) addon.db.profile.names.position.x = val end,
-					disabled = function() return not addon.db.profile.names.position.enable end
+					disabled = function() return not addon.db.profile.names.position.enable end,
+					set = function(_, val) addon.db.profile.names.position.x = val; addon.lrf:tryUpdate() end,
 				},
 				positionY = {
 					order = 2.3,
@@ -269,8 +269,8 @@ addon.options = {
 					max = 200,
 					step = 1,
 					get = function() return addon.db.profile.names.position.y end,
-					set = function(_, val) addon.db.profile.names.position.y = val end,
-					disabled = function() return not addon.db.profile.names.position.enable end
+					disabled = function() return not addon.db.profile.names.position.enable end,
+					set = function(_, val) addon.db.profile.names.position.y = val; addon.lrf:tryUpdate() end,
 				},
 			}
 		},
