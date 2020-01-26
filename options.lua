@@ -15,6 +15,9 @@ local anchorOptions = {
 addon.defaultSettings = {
   profile = {
 		enable = true,
+		sorting = {
+			enable = true
+		},
 		auras = {
 			scaling = {
 				enable = true,
@@ -23,8 +26,8 @@ addon.defaultSettings = {
 			},
 			amount = {
 				enable = false,
-				buffs = 3,
-				debuffs = 3
+				buffs = 6,
+				debuffs = 6
 			}
 		},
 		names = {
@@ -62,23 +65,13 @@ addon.options = {
 					set = function(info,val) addon.db.profile.enable = val  end,
 					get = function(info) return addon.db.profile.enable end
 				},
-				save = {
+				sortingEnabled = {
 					order = 2,
-					type = "execute",
-					name = "Save & reload",
-					desc = "Reloads UI",
-					func = function() ReloadUI() end,
-				},
-				reset = {
-					order = 3,
-					type = "execute",
-					name = "Reset settings",
-					desc = "Resets all your settings",
-					confirm = true,
-					func = function()
-							addon.db:ResetDB("Default")
-							ReloadUI()
-					end,
+					name = "Sort party",
+					desc = "Sort parties of 5 players or less by party number, with yourself being last. (Works well along with /target party1 macros)",
+					type = "toggle",
+					set = function(_, val) addon.db.profile.sorting.enable = val; lrf:sort(CompactRaidFrameContainer) end,
+					get = function() return addon.db.profile.sorting.enable end,
 				}
 			}
 		},
@@ -173,16 +166,11 @@ addon.options = {
 			order = 2,
 			inline = true,
 			args = {
-				generalHeader = {
-					type = "header",
-					name = "General",
-					order = 0,
-				},
 				hideServerName = {
 					type = "toggle",
 					name = "Hide servernames",
 					order = 0.1,
-					set = function(info,val) addon.db.profile.names.hideServerName = val  end,
+					set = function(info,val) addon.db.profile.names.hideServerName = val end,
 					get = function(info) return addon.db.profile.names.hideServerName end
 				},
 				nameScale = {
@@ -270,6 +258,21 @@ addon.options = {
 					disabled = function() return not addon.db.profile.names.position.enable end
 				},
 			}
+		},
+		save = {
+			order = 3,
+			type = "execute",
+			name = "Save & reload",
+			desc = "Reloads UI",
+			func = function() ReloadUI() end,
+		},
+		reset = {
+			order = 4,
+			type = "execute",
+			name = "Reset settings",
+			desc = "Resets all your settings",
+			confirm = true,
+			func = function() addon.db:ResetDB("Default"); ReloadUI() end,
 		}
   }
 }

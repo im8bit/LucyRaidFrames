@@ -31,21 +31,26 @@ function lrf:adjustFrameSizeSliders()
   w:SetMinMaxValues(1,150)
 end
 
+function lrf:forEveryCRF(func)
+  local index = 1
+  local frame
+  repeat
+    frame = _G["CompactRaidFrame"..index]
+    if frame then
+      if frame:IsForbidden() then return end --!!!
+      func(frame)
+    end
+    index = index + 1
+  until not frame
+end
+
 function lrf:hideBackgrounds()
   if GetNumGroupMembers() == 0 then return end
+  local raidFrameBackgroundAlpha = .4
   C_Timer.After(0.3, function()
-    local raidFrameBackgroundAlpha = .4
-    local index = 1
-    local frame
-    repeat
-      frame = _G["CompactRaidFrame"..index]
-      if frame then
-        if frame:IsForbidden() then return end --!!!
-        -- frame.background:Hide()
-        frame.background:SetAlpha(raidFrameBackgroundAlpha)
-      end
-      index = index + 1
-    until not frame
+    lrf:forEveryCRF(function(frame)
+      frame.background:SetAlpha(raidFrameBackgroundAlpha)
+    end)
   end)
 end
 
@@ -58,16 +63,17 @@ local function Sort_GroupAscending_PlayerBottom(t1, t2)
   return t1 < t2;
 end
 
-
 function lrf:sort(frame)
   if (
     GetNumGroupMembers() > 5 or
     frame:IsForbidden() or
     InCombatLockdown() or
-    not frame.groupMode
+    not frame.groupMode or
+    not addon.db.profile.sorting.enable
   ) then
     return
   end
+  self:Print("Sorting container now!")
   CompactRaidFrameContainer_SetFlowSortFunction(frame, Sort_GroupAscending_PlayerBottom);
 end
 
@@ -75,7 +81,7 @@ end
 -- BLIZZARD RAIDFRAME ALTERATIONS --
 ------------------------------------
 
-local function SetMaxBuffs(frame, numbuffs)
+local function SetMaxBuffs(frame)
   if frame:IsForbidden() then return end --!!!
 
   local buffscale = addon.db.profile.auras.scaling.buffs;
@@ -141,7 +147,7 @@ local function UpdateRoleIcon(frame)
   end
 end
 
-local function UtilSetDebuff(frame, unit, index, filter, isBossAura, isBossBuff)
+local function UtilSetDebuff(frame)
   if frame:IsForbidden() then return end --!!!
   frame.count:SetScale(0.7);
 end
@@ -159,6 +165,7 @@ local function CRFManagerOnEvent(self, event, ...)
   ) then
     lrf:sort(self.container)
     lrf:hideBackgrounds();
+    lrf:forEveryCRF(SetMaxBuffs)
   end
 end
 
