@@ -75,7 +75,6 @@ function lrf:sort(frame)
   ) then
     return
   end
-  self:Print("Sorting container now!")
   CompactRaidFrameContainer_SetFlowSortFunction(frame, Sort_GroupAscending_PlayerBottom);
 end
 
