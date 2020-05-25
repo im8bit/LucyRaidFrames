@@ -93,11 +93,6 @@ end
  lrf.SetMaxBuffs = function(frame)
   if frame:IsForbidden() then return end --!!!
 
-  if (addon.db.profile.auras.amount.enable) then
-    frame.maxBuffs = addon.db.profile.auras.amount.buffs
-    frame.maxDebuffs = addon.db.profile.auras.amount.debuffs
-  end
-
   local buffscale = addon.db.profile.auras.scaling.buffs;
   local debuffscale = addon.db.profile.auras.scaling.debuffs;
 

@@ -146,7 +146,8 @@ addon.options = {
 					order = 2.1,
 					desc = "Modify the max amount of buffs/debuffs shown",
 					set = function(info,val) addon.db.profile.auras.amount.enable = val; addon.lrf:tryUpdate()  end,
-					get = function(info) return addon.db.profile.auras.amount.enable end
+					get = function(info) return addon.db.profile.auras.amount.enable end,
+					disabled = true
 				},
 				buffAmount = {
 					order = 2.2,
@@ -154,7 +155,7 @@ addon.options = {
 					name = "Buffs",
 					desc = "Not yet implemented",
 					min = 0,
-					max = 15,
+					max = 10,
 					step = 1,
 					get = function() return addon.db.profile.auras.amount.buffs end,
 					set = function(_, val) addon.db.profile.auras.amount.buffs = val; addon.lrf:tryUpdate() end,
@@ -166,7 +167,7 @@ addon.options = {
 					name = "Debuffs",
 					desc = "Not yet implemented",
 					min = 0,
-					max = 15,
+					max = 10,
 					step = 1,
 					get = function() return addon.db.profile.auras.amount.debuffs end,
 					set = function(_, val) addon.db.profile.auras.amount.debuffs = val; addon.lrf:tryUpdate() end,
