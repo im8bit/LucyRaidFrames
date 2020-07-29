@@ -12,9 +12,14 @@ AceDialog = LibStub("AceConfigDialog-3.0")
 
 function lrf:RegisterEvents()
   self:RegisterEvent("PLAYER_REGEN_ENABLED")
+  self:RegisterEvent("PLAYER_LOGIN")
 end
 
-function lrf:PLAYER_REGEN_ENABLED(event)
+function lrf:PLAYER_REGEN_ENABLED()
+  CompactRaidFrameContainer_TryUpdate(CompactRaidFrameContainer);
+end
+
+function lrf:PLAYER_LOGIN()
   CompactRaidFrameContainer_TryUpdate(CompactRaidFrameContainer);
 end
 
@@ -37,6 +42,10 @@ function lrf:adjustFrameSizeSliders()
   w:SetMinMaxValues(1,150)
 end
 
+function lrf:setScale(value)
+  CompactRaidFrameManager:SetScale(value);
+end
+
 function lrf:forEveryCRF(func)
   local index = 1
   local frame
@@ -53,11 +62,11 @@ end
 function lrf:hideBackgrounds()
   if (
     GetNumGroupMembers() == 0 or
-    addon.db.profile.background.alpha == 1
+    addon.db.profile.frame.bgAlpha == 1
   ) then return end
   C_Timer.After(0.3, function()
     lrf:forEveryCRF(function(frame)
-      frame.background:SetAlpha(addon.db.profile.background.alpha)
+      frame.background:SetAlpha(addon.db.profile.frame.bgAlpha)
     end)
   end)
 end
@@ -115,21 +124,22 @@ lrf.UpdateName = function(frame)
   if (playerName) then
     if (addon.db.profile.names.hideServerName) then
       local nameWithoutRealm = gsub(playerName, "%-[^|]+", "");
-      name:SetText(nameWithoutRealm);
+      local ellipsedName = string.sub(nameWithoutRealm, 0, addon.db.profile.names.maxLength)
+      name:SetText(ellipsedName);
     end
     name:SetScale(addon.db.profile.names.scale);
+    name:ClearAllPoints();
+    name:SetPoint(
+      addon.db.profile.names.position.anchor,
+      addon.db.profile.names.position.x,
+      addon.db.profile.names.position.y
+    );
   end
 
   if (addon.db.profile.names.alpha.enable) then
     if InCombatLockdown() then
       name:SetAlpha(addon.db.profile.names.alpha.combat);
     else
-      name:ClearAllPoints();
-      name:SetPoint(
-        addon.db.profile.names.position.anchor,
-        addon.db.profile.names.position.x,
-        addon.db.profile.names.position.y
-      );
       name:SetAlpha(addon.db.profile.names.alpha.noCombat);
     end
   end
@@ -203,6 +213,7 @@ function lrf:OnEnable()
     self:RegisterEvents();
     self:adjustFrameSizeSliders();
     self:CRFHooker();
+    self:setScale(addon.db.profile.frame.scale)
   end
 end
 

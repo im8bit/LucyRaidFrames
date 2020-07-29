@@ -15,8 +15,9 @@ local anchorOptions = {
 addon.defaultSettings = {
   profile = {
 		enable = true,
-		background = {
-			alpha = 0.4
+		frame = {
+			scale = 1.0,
+			bgAlpha = 0.4
 		},
 		sorting = {
 			enable = true
@@ -35,6 +36,7 @@ addon.defaultSettings = {
 		},
 		names = {
 			hideServerName = true,
+			maxLength = 6,
 			scale = 0.9,
 			alpha = {
 				enable = true,
@@ -76,8 +78,13 @@ addon.options = {
 					set = function(_, val) addon.db.profile.sorting.enable = val; lrf:sort(CompactRaidFrameContainer) end,
 					get = function() return addon.db.profile.sorting.enable end,
 				},
-				backgroundAlpha = {
+				frameHeader = {
+					type = "header",
+					name = "Frames",
 					order = 3,
+				},
+				backgroundAlpha = {
+					order = 3.2,
 					type = "range",
 					name = "Background Alpha",
 					desc = "Fade out the background of the raidframes",
@@ -85,8 +92,19 @@ addon.options = {
 					max = 1,
 					step = 0.01,
 					isPercent = true,
-					get = function() return addon.db.profile.background.alpha end,
-					set = function(_, val) addon.db.profile.background.alpha = val; addon.lrf:hideBackgrounds() end,
+					get = function() return addon.db.profile.frame.bgAlpha end,
+					set = function(_, val) addon.db.profile.frame.bgAlpha = val; addon.lrf:hideBackgrounds() end,
+				},
+				raidFrameScale = {
+					order = 3.1,
+					type = "range",
+					name = "Scale",
+					desc = "Overall scale",
+					min = 0.1,
+					max = 2,
+					step = 0.01,
+					get = function() return addon.db.profile.frame.scale end,
+					set = function(_, val) addon.db.profile.frame.scale = val; addon.lrf:setScale(val) end,
 				},
 			}
 		},
@@ -113,7 +131,7 @@ addon.options = {
 					order = 1.2,
 					type = "range",
 					name = "Buffs",
-					desc = "Buffs",
+					desc = "",
 					min = 0,
 					max = 2,
 					step = 0.01,
@@ -135,44 +153,44 @@ addon.options = {
 					set = function(_, val) addon.db.profile.auras.scaling.debuffs = val; addon.lrf:tryUpdate() end,
 					disabled = function() return not addon.db.profile.auras.scaling.enable end
 				},
-				amountHeader = {
-					type = "header",
-					name = "Amount (WIP)",
-					order = 2,
-				},
-				enableAmount = {
-					type = "toggle",
-					name = "Enable",
-					order = 2.1,
-					desc = "Modify the max amount of buffs/debuffs shown",
-					set = function(info,val) addon.db.profile.auras.amount.enable = val; addon.lrf:tryUpdate()  end,
-					get = function(info) return addon.db.profile.auras.amount.enable end,
-					disabled = true
-				},
-				buffAmount = {
-					order = 2.2,
-					type = "range",
-					name = "Buffs",
-					desc = "Not yet implemented",
-					min = 0,
-					max = 10,
-					step = 1,
-					get = function() return addon.db.profile.auras.amount.buffs end,
-					set = function(_, val) addon.db.profile.auras.amount.buffs = val; addon.lrf:tryUpdate() end,
-					disabled = function() return not addon.db.profile.auras.amount.enable end
-				},
-				debuffAmount = {
-					order = 2.3,
-					type = "range",
-					name = "Debuffs",
-					desc = "Not yet implemented",
-					min = 0,
-					max = 10,
-					step = 1,
-					get = function() return addon.db.profile.auras.amount.debuffs end,
-					set = function(_, val) addon.db.profile.auras.amount.debuffs = val; addon.lrf:tryUpdate() end,
-					disabled = function() return not addon.db.profile.auras.amount.enable end
-				}
+				-- amountHeader = {
+				-- 	type = "header",
+				-- 	name = "Amount (WIP)",
+				-- 	order = 2,
+				-- },
+				-- enableAmount = {
+				-- 	type = "toggle",
+				-- 	name = "Enable",
+				-- 	order = 2.1,
+				-- 	desc = "Modify the max amount of buffs/debuffs shown",
+				-- 	set = function(info,val) addon.db.profile.auras.amount.enable = val; addon.lrf:tryUpdate()  end,
+				-- 	get = function(info) return addon.db.profile.auras.amount.enable end,
+				-- 	disabled = true
+				-- },
+				-- buffAmount = {
+				-- 	order = 2.2,
+				-- 	type = "range",
+				-- 	name = "Buffs",
+				-- 	desc = "Not yet implemented",
+				-- 	min = 0,
+				-- 	max = 10,
+				-- 	step = 1,
+				-- 	get = function() return addon.db.profile.auras.amount.buffs end,
+				-- 	set = function(_, val) addon.db.profile.auras.amount.buffs = val; addon.lrf:tryUpdate() end,
+				-- 	disabled = function() return not addon.db.profile.auras.amount.enable end
+				-- },
+				-- debuffAmount = {
+				-- 	order = 2.3,
+				-- 	type = "range",
+				-- 	name = "Debuffs",
+				-- 	desc = "Not yet implemented",
+				-- 	min = 0,
+				-- 	max = 10,
+				-- 	step = 1,
+				-- 	get = function() return addon.db.profile.auras.amount.debuffs end,
+				-- 	set = function(_, val) addon.db.profile.auras.amount.debuffs = val; addon.lrf:tryUpdate() end,
+				-- 	disabled = function() return not addon.db.profile.auras.amount.enable end
+				-- }
 			}
 		},
 		nameGroup = {
@@ -188,8 +206,18 @@ addon.options = {
 					set = function(info,val) addon.db.profile.names.hideServerName = val; addon.lrf:tryUpdate() end,
 					get = function(info) return addon.db.profile.names.hideServerName end
 				},
-				nameScale = {
+				nameLength = {
 					order = 0.2,
+					name = "Max name length",
+					type = "range",
+					min = 1,
+					max = 15,
+					step = 1,
+					get = function() return addon.db.profile.names.maxLength end,
+					set = function(_, val) addon.db.profile.names.maxLength = val; addon.lrf:tryUpdate() end,
+				},
+				nameScale = {
+					order = 0.3,
 					type = "range",
 					name = "Scale",
 					min = 0,
