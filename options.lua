@@ -16,7 +16,7 @@ addon.defaultSettings = {
   profile = {
 		enable = true,
 		frame = {
-			scale = 1.0,
+			scale = 1/GetCVar("UIScale"),
 			bgAlpha = 0.4
 		},
 		sorting = {
