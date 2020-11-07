@@ -167,7 +167,7 @@ end
 
 lrf.UtilSetDebuff = function(frame)
   if frame:IsForbidden() then return end --!!!
-  frame.count:SetScale(0.7);
+  frame.count:SetScale(0.5);
 end
 
 lrf.CRFContainerOnEvent = function(self, event, ...)
